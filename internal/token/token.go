@@ -22,8 +22,8 @@ const (
 	//Delimitadores
 	COMMA     = ","
 	SEMICOLON = ";"
-	LBRACE    = "("
-	RBRACE    = ")"
+	LPAREN    = "("
+	RPAREN    = ")"
 
 	//Keywords
 	OFFER   = "OFFER"
