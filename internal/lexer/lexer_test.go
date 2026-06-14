@@ -7,16 +7,21 @@ import (
 )
 
 func TestNextToken(t *testing.T) {
-	input := `=+();`
+	input := `SEND OFFER messi FOR messi IN USER pepe;`
 
 	tests := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
-		{token.ASSIGN, "="},
-		{token.PLUS, "+"},
-		{token.LPAREN, "("},
-		{token.RPAREN, ")"},
+		{token.SEND, "SEND"},
+		{token.OFFER, "OFFER"},
+		{token.IDENT, "messi"},
+		{token.FOR, "FOR"},
+		{token.IDENT, "messi"},
+		{token.IN, "IN"},
+		{token.USER, "USER"},
+		{token.IDENT, "pepe"},
+		{token.SEMICOLON, ";"},
 	}
 
 	l := New(input)

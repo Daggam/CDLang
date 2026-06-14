@@ -1,6 +1,8 @@
 package lexer
 
-import "github.com/Daggam/CDL/internal/token"
+import (
+	"github.com/Daggam/CDL/internal/token"
+)
 
 type Lexer struct {
 	input        string
@@ -31,6 +33,8 @@ func (l *Lexer) readChar() {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
+	l.skipWhitespace()
+
 	switch l.ch {
 	case '=':
 		tok = newToken(token.ASSIGN, l.ch)
@@ -47,11 +51,42 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
+	default:
+		if isLetter(l.ch) {
+			tok.Literal = l.readIdentifier()
+			//Veamos que tipo de token es
+			tok.Type = token.LookupIdent(tok.Literal)
+			return tok
+		} else {
+			tok = newToken(token.ILLEGAL, l.ch)
+		}
 	}
 	l.readChar()
 	return tok
 }
 
+// Retorna una nueva token segun el tipo y el caracter.
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
+}
+
+// Retorna el literal del identificador. (Lee el identificador completo)
+func (l *Lexer) readIdentifier() string {
+	position := l.position
+	for isLetter(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+// Funcion auxiliar que me ayuda a decidir el formato del identificador.
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+// Funcion auxiliar que saltea los espacios en blanco u otros caracteres especiales.
+func (l *Lexer) skipWhitespace() {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		l.readChar()
+	}
 }
