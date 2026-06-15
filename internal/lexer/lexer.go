@@ -57,6 +57,9 @@ func (l *Lexer) NextToken() token.Token {
 			//Veamos que tipo de token es
 			tok.Type = token.LookupIdent(tok.Literal)
 			return tok
+		} else if isDigit(l.ch) {
+			tok.Literal = l.readNumber()
+			tok.Type = token.INT
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
@@ -82,6 +85,20 @@ func (l *Lexer) readIdentifier() string {
 // Funcion auxiliar que me ayuda a decidir el formato del identificador.
 func isLetter(ch byte) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+// Lee el numero.
+func (l *Lexer) readNumber() string {
+	position := l.position
+	for isDigit(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+// Funcion auxiliar para detección de números enteros.
+func isDigit(ch byte) bool {
+	return ch >= '0' && ch <= '9'
 }
 
 // Funcion auxiliar que saltea los espacios en blanco u otros caracteres especiales.
