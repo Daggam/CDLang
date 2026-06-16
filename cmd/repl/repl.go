@@ -12,18 +12,16 @@ import (
 const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
+	reader := bufio.NewReader(in)
 
 	for {
 		fmt.Printf(PROMPT)
-		scanned := scanner.Scan()
-		if !scanned {
-			return
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			panic("Hubo un error no esperado")
 		}
 
-		line := scanner.Text()
 		l := lexer.New(line)
-
 		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
 			fmt.Printf("%+v\n", tok)
 		}

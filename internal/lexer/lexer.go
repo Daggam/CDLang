@@ -34,6 +34,7 @@ func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
 	l.skipWhitespace()
+	l.skipComments()
 
 	switch l.ch {
 	case '=':
@@ -106,5 +107,15 @@ func isDigit(ch byte) bool {
 func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
 		l.readChar()
+	}
+}
+
+func (l *Lexer) skipComments() {
+	for l.ch == '/' && l.input[l.readPosition] == '/' {
+		for l.ch != '\n' {
+			l.readChar()
+		}
+		//fmt.Printf("%v", l.ch)
+		l.readChar() // Pues se encuentra con \n y necesita saltearselo.
 	}
 }
