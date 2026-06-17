@@ -8,12 +8,17 @@ import (
 )
 
 func TestOfferStatement(t *testing.T) {
-	input := `OFFER messi;`
+	input := `
+	OFFER messi;
+	OFFER USER;
+	OFFER cristiano;`
 
 	l := lexer.New(input)
 	p := New(l)
 
 	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
 	if program == nil {
 		t.Fatalf("ParseProgram() retorno nulo.")
 	}
@@ -22,6 +27,8 @@ func TestOfferStatement(t *testing.T) {
 		expectedCollection string
 	}{
 		{"messi"},
+		{"cristiano"},
+		{"mbappe"},
 	}
 
 	for i, tt := range tests {
@@ -55,4 +62,18 @@ func testOfferStatement(t *testing.T, s ast.Statement, collection string) bool {
 	}
 
 	return true
+}
+
+func checkParserErrors(t *testing.T, p *Parser) {
+	errors := p.Errors()
+
+	if len(errors) == 0 {
+		return
+	}
+
+	t.Errorf("El parser tuvo %d errores.", len(errors))
+	for _, msg := range errors {
+		t.Errorf("Parser error: %q", msg)
+	}
+	t.FailNow()
 }
