@@ -1,7 +1,9 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/Daggam/CDL/internal/ast"
 	"github.com/Daggam/CDL/internal/lexer"
@@ -77,11 +79,17 @@ func (p *Parser) parseOfferStatement() *ast.OfferStatement {
 		return nil
 	}
 
-	stmt.Collectable = &ast.Collectable{Token: p.curToken, Value: p.curToken.Literal}
+	collectable, err := p.parseCollectable()
+
+	if err != nil {
+		return nil
+	}
+
+	stmt.Collectable = collectable
 
 	//Saltea las expresiones hasta que encuentra un punto y coma
-	for !p.curTokenIs(token.SEMICOLON) {
-		p.nextToken()
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
 	}
 
 	return stmt
@@ -106,4 +114,25 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		p.peekError(t)
 		return false
 	}
+}
+
+func (p *Parser) parseCollectable() (*ast.Collectable, error) {
+	collectable := &ast.Collectable{Token: p.curToken, Value: p.curToken.Literal, Amount: 1}
+
+	if p.peekTokenIs(token.LPAREN) {
+		p.nextToken()
+		if !p.expectPeek(token.INT) {
+			return collectable, errors.New("Se esperaba la token INT")
+		}
+		value, err := strconv.Atoi(p.curToken.Literal)
+		if err != nil {
+			return collectable, err
+		}
+		collectable.Amount = value
+		if !p.expectPeek(token.RPAREN) {
+			return collectable, errors.New("Se esperaba la token ')'")
+		}
+	}
+
+	return collectable, nil
 }

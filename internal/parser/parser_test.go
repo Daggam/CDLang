@@ -10,8 +10,8 @@ import (
 func TestOfferStatement(t *testing.T) {
 	input := `
 	OFFER messi;
-	OFFER USER;
-	OFFER cristiano;`
+	OFFER cristiano;
+	OFFER mbappe;`
 
 	l := lexer.New(input)
 	p := New(l)

@@ -43,9 +43,9 @@ func (ofs *OfferStatement) statementNode()       {}
 func (ofs *OfferStatement) TokenLiteral() string { return ofs.Token.Literal }
 
 type Collectable struct {
-	Token token.Token // token IDENT
-	Value string      // Nombre del coleccionable
-	// Después agregamos la cantidad
+	Token  token.Token // token IDENT
+	Value  string      // Nombre del coleccionable
+	Amount int         // Después agregamos la cantidad
 }
 
 func (c *Collectable) expressionNode()      {}
