@@ -35,8 +35,8 @@ func (p *Program) TokenLiteral() string {
 
 // OFFER STATEMENT
 type OfferStatement struct {
-	Token       token.Token
-	Collectable *Collectable //Esto hay que cambiarlo luego por *Collectables
+	Token        token.Token
+	Collectables []*Collectable //Esto hay que cambiarlo luego por *Collectables
 }
 
 func (ofs *OfferStatement) statementNode()       {}

@@ -9,7 +9,7 @@ import (
 
 func TestOfferStatement(t *testing.T) {
 	input := `
-	OFFER messi;
+	OFFER messi, cristiano(20), mbappe;
 	OFFER cristiano;
 	OFFER mbappe;`
 
@@ -24,22 +24,22 @@ func TestOfferStatement(t *testing.T) {
 	}
 
 	tests := []struct {
-		expectedCollection string
+		expectedCollections []string
 	}{
-		{"messi"},
-		{"cristiano"},
-		{"mbappe"},
+		{[]string{"messi", "cristiano", "mbappe"}},
+		{[]string{"cristiano"}},
+		{[]string{"mbappe"}},
 	}
 
 	for i, tt := range tests {
 		stmt := program.Statements[i]
-		if !testOfferStatement(t, stmt, tt.expectedCollection) {
+		if !testOfferStatement(t, stmt, tt.expectedCollections) {
 			return
 		}
 	}
 }
 
-func testOfferStatement(t *testing.T, s ast.Statement, collection string) bool {
+func testOfferStatement(t *testing.T, s ast.Statement, collections []string) bool {
 	if s.TokenLiteral() != "OFFER" {
 		t.Errorf("s.TokenLiteral no es 'OFFER'. se obtuvo=%q", s.TokenLiteral())
 		return false
@@ -50,15 +50,16 @@ func testOfferStatement(t *testing.T, s ast.Statement, collection string) bool {
 	if !ok {
 		t.Errorf("s no es un *ast.OfferStatement, se obtuvo=%T", s)
 	}
+	for i, collectable := range offerStmt.Collectables {
+		if collectable.Value != collections[i] {
+			t.Errorf("offerStmt.Collectable.Value no es %s, sino =%s", collections[i], collectable.Value)
+			return false
+		}
 
-	if offerStmt.Collectable.Value != collection {
-		t.Errorf("offerStmt.Collectable.Value no es %s, sino =%s", collection, offerStmt.Collectable.Value)
-		return false
-	}
-
-	if offerStmt.Collectable.TokenLiteral() != collection {
-		t.Errorf("offerStmt.Collectable.TokenLiteral() no es %s, sino =%s", collection, offerStmt.Collectable.TokenLiteral())
-		return false
+		if collectable.TokenLiteral() != collections[i] {
+			t.Errorf("offerStmt.Collectable.TokenLiteral() no es %s, sino =%s", collections[i], collectable.TokenLiteral())
+			return false
+		}
 	}
 
 	return true

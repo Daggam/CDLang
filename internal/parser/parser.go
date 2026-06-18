@@ -75,17 +75,13 @@ func (p *Parser) parseStatement() ast.Statement {
 func (p *Parser) parseOfferStatement() *ast.OfferStatement {
 	stmt := &ast.OfferStatement{Token: p.curToken}
 
-	if !p.expectPeek(token.IDENT) {
-		return nil
-	}
-
-	collectable, err := p.parseCollectable()
+	collectables, err := p.parseCollectables()
 
 	if err != nil {
 		return nil
 	}
 
-	stmt.Collectable = collectable
+	stmt.Collectables = collectables
 
 	//Saltea las expresiones hasta que encuentra un punto y coma
 	if !p.expectPeek(token.SEMICOLON) {
@@ -117,6 +113,10 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 }
 
 func (p *Parser) parseCollectable() (*ast.Collectable, error) {
+	if !p.expectPeek(token.IDENT) {
+		return nil, errors.New("Se esperaba la token IDENT")
+	}
+
 	collectable := &ast.Collectable{Token: p.curToken, Value: p.curToken.Literal, Amount: 1}
 
 	if p.peekTokenIs(token.LPAREN) {
@@ -135,4 +135,29 @@ func (p *Parser) parseCollectable() (*ast.Collectable, error) {
 	}
 
 	return collectable, nil
+}
+
+func (p *Parser) parseCollectables() ([]*ast.Collectable, error) {
+	collectables := []*ast.Collectable{}
+
+	firstCollectable, err := p.parseCollectable()
+	if err != nil {
+		return nil, errors.New("No pudo obtenerse el primer coleccionable.")
+	}
+
+	collectables = append(collectables, firstCollectable)
+
+	//COMO OPCIONAL, NOS DEBERÍA PERMITIR AGREGAR VARIAS COLECCIONES (por eso es parseCollectables)
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		collectable, err := p.parseCollectable()
+
+		if err != nil {
+			return collectables, errors.New("Hubo un error en el parseo de los coleccionables.")
+		}
+
+		collectables = append(collectables, collectable)
+	}
+
+	return collectables, nil
 }
