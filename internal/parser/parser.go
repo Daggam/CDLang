@@ -71,6 +71,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseGetOfferStatement()
 	case token.SEND:
 		return p.parseSendOfferStatement()
+	case token.VIEW:
+		return p.parseViewOfferStatement()
 	default:
 		return nil
 	}
@@ -147,6 +149,15 @@ func (p *Parser) parseSendOfferStatement() *ast.SendOfferStatement {
 	}
 	stmt.Username = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+	return stmt
+}
+
+func (p *Parser) parseViewOfferStatement() *ast.ViewOfferStatement {
+	stmt := &ast.ViewOfferStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.OFFER) {
 		return nil
 	}
 	return stmt

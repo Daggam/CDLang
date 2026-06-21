@@ -212,3 +212,25 @@ func TestSendOffer(t *testing.T) {
 		}
 	}
 }
+
+func TestViewOffer(t *testing.T) {
+	input := `
+	VIEW OFFER;
+	`
+	program := createProgram(t, input)
+
+	if len(program.Statements) != 1 {
+		t.Error("Se esperaba una unica sentencia.")
+	}
+	stmt := program.Statements[0]
+
+	if stmt.TokenLiteral() != "VIEW" {
+		t.Errorf("stmt.TokenLiteral no es VIEW, sino que es %q", stmt.TokenLiteral())
+	}
+
+	_, ok := stmt.(*ast.ViewOfferStatement)
+
+	if !ok {
+		t.Errorf("stmt no es del tipo ast.ViewOfferStatement, sino que es del tipo %T", stmt)
+	}
+}

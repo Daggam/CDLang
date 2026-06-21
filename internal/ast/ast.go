@@ -78,3 +78,12 @@ type SendOfferStatement struct {
 
 func (sos *SendOfferStatement) statementNode()       {}
 func (sos *SendOfferStatement) TokenLiteral() string { return sos.Token.Literal }
+
+//View Offer Statement
+
+type ViewOfferStatement struct {
+	Token token.Token
+}
+
+func (vos *ViewOfferStatement) statementNode()       {}
+func (vos *ViewOfferStatement) TokenLiteral() string { return vos.Token.Literal }
