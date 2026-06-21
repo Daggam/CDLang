@@ -13,15 +13,7 @@ func TestOfferStatement(t *testing.T) {
 	OFFER cristiano;
 	OFFER mbappe;`
 
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-
-	if program == nil {
-		t.Fatalf("ParseProgram() retorno nulo.")
-	}
+	program := createProgram(t, input)
 
 	tests := []struct {
 		expectedCollections []string
@@ -77,4 +69,49 @@ func checkParserErrors(t *testing.T, p *Parser) {
 		t.Errorf("Parser error: %q", msg)
 	}
 	t.FailNow()
+}
+
+func TestGetOfferStatement(t *testing.T) {
+	input := `
+	GET OFFER messi;
+	GET OFFER ronaldo;
+	GET OFFER mbappe;
+	`
+	program := createProgram(t, input)
+
+	tests := []struct {
+		expectedIdentifier string
+	}{
+		{"messi"},
+		{"ronaldo"},
+		{"mbappe"},
+	}
+
+	for i, tt := range tests {
+		stmt := program.Statements[i]
+		if stmt.TokenLiteral() != "GET" {
+			t.Errorf("stmt.TokenLiteral no es un GET sino un %q", stmt.TokenLiteral())
+		}
+		getOfferStmt, ok := stmt.(*ast.GetOfferStatement)
+
+		if !ok {
+			t.Errorf("stmt no es del tipo GetOfferStatement, sino que es del tipo %T", stmt)
+		}
+
+		identifier := getOfferStmt.Identifier
+		if identifier.Value != tt.expectedIdentifier {
+			t.Errorf("El valor de los identificadores no son iguales.")
+		}
+	}
+}
+
+func createProgram(t *testing.T, input string) *ast.Program {
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if program == nil {
+		t.Fatalf("ParseProgram() retorno nulo.")
+	}
+	return program
 }

@@ -67,10 +67,14 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.OFFER:
 		return p.parseOfferStatement()
+	case token.GET:
+		return p.parseGetOfferStatement()
 	default:
 		return nil
 	}
 }
+
+//REGION DE PARSERS
 
 func (p *Parser) parseOfferStatement() *ast.OfferStatement {
 	stmt := &ast.OfferStatement{Token: p.curToken}
@@ -88,6 +92,21 @@ func (p *Parser) parseOfferStatement() *ast.OfferStatement {
 		return nil
 	}
 
+	return stmt
+}
+
+func (p *Parser) parseGetOfferStatement() *ast.GetOfferStatement {
+	stmt := &ast.GetOfferStatement{Token: p.curToken}
+	if !p.expectPeek(token.OFFER) {
+		return nil
+	}
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	stmt.Identifier = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
 	return stmt
 }
 

@@ -50,3 +50,20 @@ type Collectable struct {
 
 func (c *Collectable) expressionNode()      {}
 func (c *Collectable) TokenLiteral() string { return c.Token.Literal }
+
+// GET OFFER STATEMENT
+type GetOfferStatement struct {
+	Token      token.Token
+	Identifier *Identifier
+}
+
+func (gofs *GetOfferStatement) statementNode()       {}
+func (gofs *GetOfferStatement) TokenLiteral() string { return gofs.Token.Literal }
+
+type Identifier struct {
+	Token token.Token
+	Value string
+}
+
+func (i *Identifier) expressionNode()      {}
+func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
