@@ -69,6 +69,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseOfferStatement()
 	case token.GET:
 		return p.parseGetOfferStatement()
+	case token.SEND:
+		return p.parseSendOfferStatement()
 	default:
 		return nil
 	}
@@ -104,6 +106,46 @@ func (p *Parser) parseGetOfferStatement() *ast.GetOfferStatement {
 		return nil
 	}
 	stmt.Identifier = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+	return stmt
+}
+
+func (p *Parser) parseSendOfferStatement() *ast.SendOfferStatement {
+	stmt := &ast.SendOfferStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.OFFER) {
+		return nil
+	}
+	//Catcheamos los LValues
+	LCollectables, err := p.parseCollectables()
+	if err != nil {
+		return nil
+	}
+	stmt.LCollectables = LCollectables
+
+	if !p.expectPeek(token.FOR) {
+		return nil
+	}
+	//Catcheamos los RValues
+	RCollectables, err := p.parseCollectables()
+	if err != nil {
+		return nil
+	}
+	stmt.RCollectables = RCollectables
+
+	//Catcheamos a los usuarios
+	if !p.expectPeek(token.IN) {
+		return nil
+	}
+	if !p.expectPeek(token.USER) {
+		return nil
+	}
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	stmt.Username = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	if !p.expectPeek(token.SEMICOLON) {
 		return nil
 	}

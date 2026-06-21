@@ -115,3 +115,100 @@ func createProgram(t *testing.T, input string) *ast.Program {
 	}
 	return program
 }
+
+func TestSendOffer(t *testing.T) {
+	input := `
+	SEND OFFER ronaldo FOR messi IN USER pepe;
+	SEND OFFER ronaldo(20) FOR messi IN USER pepe;
+	SEND OFFER ronaldo FOR wanchope(20) IN USER pepe;
+	SEND OFFER mbappe, ronaldo FOR messi IN USER pepe;
+	SEND OFFER mbappe, ronaldo(20) FOR messi IN USER pepe;
+	SEND OFFER mbappe, ronaldo, wanchope FOR messi, neymar IN USER pepe;
+	SEND OFFER mbappe, ronaldo, wanchope FOR messi, neymar(20) IN USER pepe;
+	`
+
+	program := createProgram(t, input)
+
+	type Collectable struct {
+		Value  string
+		Amount int
+	}
+
+	tests := []struct {
+		expectedLCollectables []Collectable
+		expectedRCollectables []Collectable
+		userValue             string
+	}{
+		{
+			[]Collectable{{Value: "ronaldo", Amount: 1}},
+			[]Collectable{{Value: "messi", Amount: 1}},
+			"pepe",
+		},
+		{
+			[]Collectable{{Value: "ronaldo", Amount: 20}},
+			[]Collectable{{Value: "messi", Amount: 1}},
+			"pepe",
+		},
+		{
+			[]Collectable{{Value: "ronaldo", Amount: 1}},
+			[]Collectable{{Value: "wanchope", Amount: 20}},
+			"pepe",
+		},
+		{
+			[]Collectable{{Value: "mbappe", Amount: 1}, {Value: "ronaldo", Amount: 1}},
+			[]Collectable{{Value: "messi", Amount: 1}},
+			"pepe",
+		},
+		{
+			[]Collectable{{Value: "mbappe", Amount: 1}, {Value: "ronaldo", Amount: 20}},
+			[]Collectable{{Value: "messi", Amount: 1}},
+			"pepe",
+		},
+		{
+			[]Collectable{{Value: "mbappe", Amount: 1}, {Value: "ronaldo", Amount: 1}, {Value: "wanchope", Amount: 1}},
+			[]Collectable{{Value: "messi", Amount: 1}, {Value: "neymar", Amount: 1}},
+			"pepe",
+		},
+		{
+			[]Collectable{{Value: "mbappe", Amount: 1}, {Value: "ronaldo", Amount: 1}, {Value: "wanchope", Amount: 1}},
+			[]Collectable{{Value: "messi", Amount: 1}, {Value: "neymar", Amount: 20}},
+			"pepe",
+		},
+	}
+
+	for i, tt := range tests {
+		stmt := program.Statements[i]
+		if stmt.TokenLiteral() != "SEND" {
+			t.Errorf("stmt.TokenLiteral no es SEND sino %q", stmt.TokenLiteral())
+		}
+
+		sendOfferStatement, ok := stmt.(*ast.SendOfferStatement)
+		if !ok {
+			t.Errorf("stmt no es del tipo SendOfferStatement, sino que es del tipo %T", stmt)
+		}
+
+		//Checamos los LValues y RValues
+		for i, LExpectedCollection := range tt.expectedLCollectables {
+
+			if sendOfferStatement.LCollectables[i].Value != LExpectedCollection.Value {
+				t.Errorf("Se esperaba como coleccionable a %q, pero se obtuvo %q", LExpectedCollection.Value, sendOfferStatement.LCollectables[i].Value)
+			}
+			if sendOfferStatement.LCollectables[i].Amount != LExpectedCollection.Amount {
+				t.Errorf("Se esperaba como cantidad del coleccionable a %d, pero se obtuvo %d", LExpectedCollection.Amount, sendOfferStatement.LCollectables[i].Amount)
+			}
+		}
+		for i, RExpectedCollection := range tt.expectedRCollectables {
+			if sendOfferStatement.RCollectables[i].Value != RExpectedCollection.Value {
+				t.Errorf("Se esperaba como coleccionable a %q, pero se obtuvo %q", RExpectedCollection.Value, sendOfferStatement.RCollectables[i].Value)
+			}
+			if sendOfferStatement.RCollectables[i].Amount != RExpectedCollection.Amount {
+				t.Errorf("Se esperaba como cantidad del coleccionable a %d, pero se obtuvo %d", RExpectedCollection.Amount, sendOfferStatement.RCollectables[i].Amount)
+			}
+		}
+
+		//Checamos al usuario
+		if sendOfferStatement.Username.Value != tt.userValue {
+			t.Errorf("Se esperaba a %q como valor de username, pero se obtuvo %q", tt.userValue, sendOfferStatement.Username.Value)
+		}
+	}
+}

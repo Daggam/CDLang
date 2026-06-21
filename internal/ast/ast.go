@@ -67,3 +67,14 @@ type Identifier struct {
 
 func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
+
+// SEND OFFER STATEMENT
+type SendOfferStatement struct {
+	Token         token.Token
+	LCollectables []*Collectable
+	RCollectables []*Collectable
+	Username      *Identifier
+}
+
+func (sos *SendOfferStatement) statementNode()       {}
+func (sos *SendOfferStatement) TokenLiteral() string { return sos.Token.Literal }
