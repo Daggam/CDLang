@@ -276,6 +276,47 @@ func TestAcceptTradeOffer(t *testing.T) {
 	}
 }
 
+func TestDeclineTradeOffer(t *testing.T) {
+	input := `
+	DECLINE TRADE;
+	DECLINE TRADE 1;
+	DECLINE TRADE 1,2,3;
+	`
+
+	program := createProgram(t, input)
+
+	tests := []struct {
+		expectedOfferID []int
+	}{
+		{[]int{}},
+		{[]int{1}},
+		{[]int{1, 2, 3}},
+	}
+
+	for i, tt := range tests {
+		stmt := program.Statements[i]
+
+		if stmt.TokenLiteral() != "DECLINE" {
+			t.Errorf("Se esperaba que stmt.TokenLiteral sea DECLINE, pero es =%q", stmt.TokenLiteral())
+		}
+
+		declineTradeStmt, ok := stmt.(*ast.DeclineTradeStatement)
+		if !ok {
+			t.Errorf("Se esperaba que stmt sea del tipo ast.DeclineTradeStatement, sin embargo es del tipo %T", stmt)
+		}
+
+		if len(declineTradeStmt.OfferID) != len(tt.expectedOfferID) {
+			t.Errorf("Se esperaba que se tenga %d OfferID's, sin embargo se tienen %d", len(tt.expectedOfferID), len(declineTradeStmt.OfferID))
+		}
+
+		for i, oID := range tt.expectedOfferID {
+			if declineTradeStmt.OfferID[i] != oID {
+				t.Errorf("Se espera que declineTradeStmt[%d] sea %d, pero se obtuvo %d", i, oID, declineTradeStmt.OfferID[i])
+			}
+		}
+	}
+}
+
 func TestDeleteTradeOffer(t *testing.T) {
 	input := `
 	DELETE OFFER messi;

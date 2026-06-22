@@ -97,6 +97,16 @@ type AcceptTradeStatement struct {
 func (ats *AcceptTradeStatement) statementNode()       {}
 func (ats *AcceptTradeStatement) TokenLiteral() string { return ats.Token.Literal }
 
+// Decline Offer Statement
+
+type DeclineTradeStatement struct {
+	Token   token.Token
+	OfferID []int
+}
+
+func (dos *DeclineTradeStatement) statementNode()       {}
+func (dos *DeclineTradeStatement) TokenLiteral() string { return dos.Token.Literal }
+
 // Delete Offer Statement
 
 type DeleteOfferStatement struct {

@@ -73,8 +73,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseSendOfferStatement()
 	case token.VIEW:
 		return p.parseViewOfferStatement()
-	case token.ACCEPT:
-		return p.parseAcceptTradeStatement()
+	case token.ACCEPT, token.DECLINE:
+		return p.parseADTradeStatements()
 	case token.DELETE:
 		return p.parseDeleteOfferStatement()
 	default:
@@ -171,45 +171,29 @@ func (p *Parser) parseViewOfferStatement() *ast.ViewOfferStatement {
 	return stmt
 }
 
-func (p *Parser) parseAcceptTradeStatement() *ast.AcceptTradeStatement {
-	stmt := &ast.AcceptTradeStatement{Token: p.curToken}
+func (p *Parser) parseADTradeStatements() ast.Statement {
+	stmtToken := p.curToken
+
 	if !p.expectPeek(token.TRADE) {
 		return nil
 	}
+	offerId, err := p.parseIntegers()
 
-	offerId := []int{}
-
-	//Opcional: Si detecta un número/s se los agrega.
-	if p.peekTokenIs(token.INT) {
-		p.nextToken()
-		firstOID, err := strconv.Atoi(p.curToken.Literal)
-		if err != nil {
-			return nil
-		}
-		offerId = append(offerId, firstOID)
-		//Opcional: Si detecta comas, puede haber más de un entero.
-		for p.peekTokenIs(token.COMMA) {
-			p.nextToken()
-
-			if !p.expectPeek(token.INT) {
-				return nil
-			}
-
-			if oID, err := strconv.Atoi(p.curToken.Literal); err == nil {
-				offerId = append(offerId, oID)
-			} else {
-				return nil
-			}
-		}
+	if err != nil {
+		return nil
 	}
-
-	stmt.OfferID = offerId
-
 	if !p.expectPeek(token.SEMICOLON) {
 		return nil
 	}
 
-	return stmt
+	switch stmtToken.Type {
+	case token.ACCEPT:
+		return &ast.AcceptTradeStatement{Token: stmtToken, OfferID: offerId}
+	case token.DECLINE:
+		return &ast.DeclineTradeStatement{Token: stmtToken, OfferID: offerId}
+	default:
+		return nil
+	}
 }
 
 func (p *Parser) parseDeleteOfferStatement() *ast.DeleteOfferStatement {
@@ -299,4 +283,33 @@ func (p *Parser) parseCollectables() ([]*ast.Collectable, error) {
 	}
 
 	return collectables, nil
+}
+
+func (p *Parser) parseIntegers() ([]int, error) {
+	offerId := []int{}
+
+	//Opcional: Si detecta un número/s se los agrega.
+	if p.peekTokenIs(token.INT) {
+		p.nextToken()
+		firstOID, err := strconv.Atoi(p.curToken.Literal)
+		if err != nil {
+			return nil, err
+		}
+		offerId = append(offerId, firstOID)
+		//Opcional: Si detecta comas, puede haber más de un entero.
+		for p.peekTokenIs(token.COMMA) {
+			p.nextToken()
+
+			if !p.expectPeek(token.INT) {
+				return nil, err
+			}
+
+			if oID, err := strconv.Atoi(p.curToken.Literal); err == nil {
+				offerId = append(offerId, oID)
+			} else {
+				return nil, err
+			}
+		}
+	}
+	return offerId, nil
 }
