@@ -234,3 +234,44 @@ func TestViewOffer(t *testing.T) {
 		t.Errorf("stmt no es del tipo ast.ViewOfferStatement, sino que es del tipo %T", stmt)
 	}
 }
+
+func TestAcceptTradeOffer(t *testing.T) {
+	input := `
+	ACCEPT TRADE;
+	ACCEPT TRADE 1;
+	ACCEPT TRADE 1,2,3;
+	`
+
+	program := createProgram(t, input)
+
+	tests := []struct {
+		expectedOfferID []int
+	}{
+		{[]int{}},
+		{[]int{1}},
+		{[]int{1, 2, 3}},
+	}
+
+	for i, tt := range tests {
+		stmt := program.Statements[i]
+
+		if stmt.TokenLiteral() != "ACCEPT" {
+			t.Errorf("Se esperaba que stmt.TokenLiteral sea ACCEPT, pero es =%q", stmt.TokenLiteral())
+		}
+
+		acceptTradeStmt, ok := stmt.(*ast.AcceptTradeStatement)
+		if !ok {
+			t.Errorf("Se esperaba que stmt sea del tipo ast.AcceptTradeStatement, sino que es del tipo %T", stmt)
+		}
+
+		if len(acceptTradeStmt.OfferID) != len(tt.expectedOfferID) {
+			t.Errorf("Se esperaba que se tenga %d OfferID's, sin embargo se tienen %d", len(tt.expectedOfferID), len(acceptTradeStmt.OfferID))
+		}
+
+		for i, oID := range tt.expectedOfferID {
+			if acceptTradeStmt.OfferID[i] != oID {
+				t.Errorf("Se espera que acceptTradeStmt[%d] sea %d, pero se obtuvo %d", i, oID, acceptTradeStmt.OfferID[i])
+			}
+		}
+	}
+}

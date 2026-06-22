@@ -73,6 +73,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseSendOfferStatement()
 	case token.VIEW:
 		return p.parseViewOfferStatement()
+	case token.ACCEPT:
+		return p.parseAcceptTradeStatement()
 	default:
 		return nil
 	}
@@ -160,6 +162,47 @@ func (p *Parser) parseViewOfferStatement() *ast.ViewOfferStatement {
 	if !p.expectPeek(token.OFFER) {
 		return nil
 	}
+	return stmt
+}
+
+func (p *Parser) parseAcceptTradeStatement() *ast.AcceptTradeStatement {
+	stmt := &ast.AcceptTradeStatement{Token: p.curToken}
+	if !p.expectPeek(token.TRADE) {
+		return nil
+	}
+
+	offerId := []int{}
+
+	//Opcional: Si detecta un número/s se los agrega.
+	if p.peekTokenIs(token.INT) {
+		p.nextToken()
+		firstOID, err := strconv.Atoi(p.curToken.Literal)
+		if err != nil {
+			return nil
+		}
+		offerId = append(offerId, firstOID)
+		//Opcional: Si detecta comas, puede haber más de un entero.
+		for p.peekTokenIs(token.COMMA) {
+			p.nextToken()
+
+			if !p.expectPeek(token.INT) {
+				return nil
+			}
+
+			if oID, err := strconv.Atoi(p.curToken.Literal); err == nil {
+				offerId = append(offerId, oID)
+			} else {
+				return nil
+			}
+		}
+	}
+
+	stmt.OfferID = offerId
+
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+
 	return stmt
 }
 

@@ -87,3 +87,12 @@ type ViewOfferStatement struct {
 
 func (vos *ViewOfferStatement) statementNode()       {}
 func (vos *ViewOfferStatement) TokenLiteral() string { return vos.Token.Literal }
+
+// Accept Trade Statement
+type AcceptTradeStatement struct {
+	Token   token.Token
+	OfferID []int
+}
+
+func (ats *AcceptTradeStatement) statementNode()       {}
+func (ats *AcceptTradeStatement) TokenLiteral() string { return ats.Token.Literal }
