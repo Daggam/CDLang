@@ -162,6 +162,10 @@ func (p *Parser) parseViewOfferStatement() *ast.ViewOfferStatement {
 	if !p.expectPeek(token.OFFER) {
 		return nil
 	}
+
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
 	return stmt
 }
 
