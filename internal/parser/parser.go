@@ -75,6 +75,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseViewOfferStatement()
 	case token.ACCEPT:
 		return p.parseAcceptTradeStatement()
+	case token.DELETE:
+		return p.parseDeleteOfferStatement()
 	default:
 		return nil
 	}
@@ -207,6 +209,24 @@ func (p *Parser) parseAcceptTradeStatement() *ast.AcceptTradeStatement {
 		return nil
 	}
 
+	return stmt
+}
+
+func (p *Parser) parseDeleteOfferStatement() *ast.DeleteOfferStatement {
+	stmt := &ast.DeleteOfferStatement{Token: p.curToken}
+	if !p.expectPeek(token.OFFER) {
+		return nil
+	}
+	collectables, err := p.parseCollectables()
+
+	if err != nil {
+		return nil
+	}
+	stmt.Collectables = collectables
+
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
 	return stmt
 }
 

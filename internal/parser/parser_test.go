@@ -275,3 +275,61 @@ func TestAcceptTradeOffer(t *testing.T) {
 		}
 	}
 }
+
+func TestDeleteTradeOffer(t *testing.T) {
+	input := `
+	DELETE OFFER messi;
+	DELETE OFFER messi,ronaldo,neymar;
+	DELETE OFFER messi(1), ronaldo(2),neymar;
+	`
+
+	program := createProgram(t, input)
+
+	type CollectionTest struct {
+		Value  string
+		Amount int
+	}
+
+	tests := []struct {
+		expectedCollections []CollectionTest
+	}{
+		{[]CollectionTest{
+			{Value: "messi", Amount: 1},
+		}},
+		{[]CollectionTest{
+			{Value: "messi", Amount: 1},
+			{Value: "ronaldo", Amount: 1},
+			{Value: "neymar", Amount: 1},
+		}},
+		{[]CollectionTest{
+			{Value: "messi", Amount: 1},
+			{Value: "ronaldo", Amount: 2},
+			{Value: "neymar", Amount: 1},
+		}},
+	}
+
+	for i, tt := range tests {
+		stmt := program.Statements[i]
+		if stmt.TokenLiteral() != "DELETE" {
+			t.Errorf("Se esperaba que stmt.TokenLiteral sea 'DELETE', pero se obtuvo =%q", stmt.TokenLiteral())
+		}
+		deleteOfferStatement, ok := stmt.(*ast.DeleteOfferStatement)
+
+		if !ok {
+			t.Errorf("stmt no es del tipo ast.DeleteOfferStatement, sino que es del tipo %T", stmt)
+		}
+
+		if len(deleteOfferStatement.Collectables) != len(tt.expectedCollections) {
+			t.Errorf("deleteOfferStatement.Collectables se esperaba que tenga una longitud de %d, pero tiene una de %d", len(tt.expectedCollections), len(deleteOfferStatement.Collectables))
+		}
+
+		for i, collectable := range deleteOfferStatement.Collectables {
+			if collectable.Value != tt.expectedCollections[i].Value {
+				t.Errorf("Se esperaba que el collectable.Value sea %q, pero es %q", tt.expectedCollections[i].Value, collectable.Value)
+			}
+			if collectable.Amount != tt.expectedCollections[i].Amount {
+				t.Errorf("[%s] Se esperaba que el collectable.Amount sea de %d, pero es de %d", collectable.Value, tt.expectedCollections[i].Amount, collectable.Amount)
+			}
+		}
+	}
+}

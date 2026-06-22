@@ -41,6 +41,7 @@ const (
 	TRADE   = "TRADE"
 	IN      = "IN"
 	USER    = "USER"
+	DELETE  = "DELETE"
 )
 
 var keywords = map[string]TokenType{
@@ -55,6 +56,7 @@ var keywords = map[string]TokenType{
 	"trade":   TRADE,
 	"in":      IN,
 	"user":    USER,
+	"delete":  DELETE,
 }
 
 func LookupIdent(ident string) TokenType {
