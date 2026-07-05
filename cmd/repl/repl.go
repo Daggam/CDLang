@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/Daggam/CDL/internal/lexer"
-	"github.com/Daggam/CDL/internal/token"
+	"github.com/Daggam/CDL/internal/parser"
 )
 
 const PROMPT = ">> "
@@ -22,8 +22,21 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		l := lexer.New(line)
-		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-			fmt.Printf("%+v\n", tok)
+		p := parser.New(l)
+
+		p.ParseProgram()
+
+		if len(p.Errors()) != 0 {
+			printParseErrors(out, p.Errors())
 		}
+
+		//io.WriteString(out, program.String())
+		//io.WriteString(out, "\n")
+	}
+}
+
+func printParseErrors(out io.Writer, errors []string) {
+	for _, msg := range errors {
+		io.WriteString(out, msg+"\n")
 	}
 }

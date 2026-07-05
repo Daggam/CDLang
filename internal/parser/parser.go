@@ -23,7 +23,6 @@ func New(l *lexer.Lexer) *Parser {
 		l:      l,
 		errors: []string{},
 	}
-
 	//Leemos dos tokens, así curToken y peekToken sean seteados correctamente
 	p.nextToken()
 	p.nextToken()
@@ -36,7 +35,7 @@ func (p *Parser) Errors() []string {
 }
 
 func (p *Parser) peekError(t token.TokenType) {
-	msg := fmt.Sprintf("se esperaba que la próxima token sea %s y en su lugar fue %s.",
+	msg := fmt.Sprintf("Se esperaba que la próxima token sea del tipo %s y en su lugar fue %s.",
 		t, p.peekToken.Type)
 
 	p.errors = append(p.errors, msg)
@@ -52,11 +51,16 @@ func (p *Parser) nextToken() {
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
-
+	first := true
 	for !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
+			first = false
+		} else if first {
+			msg := fmt.Sprintf("Se esperaba que comience la sentencia con: OFFER, GET, SEND, VIEW, ACCEPT, DECLINE, DELETE; Sin embargo comenzó con %q", p.curToken.Literal)
+			p.errors = append(p.errors, msg)
+			break
 		}
 		p.nextToken()
 	}
