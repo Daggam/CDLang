@@ -71,7 +71,7 @@ func TestErrorOfferStatements(t *testing.T) {
 		expectedMessage string
 	}{
 		{"OFFER AR-LM;", "unknown collectable: El coleccionable AR-LM no existe."},
-		{"OFFER AR-LM10(29);", "no stock: No tienes suficiente coleccionables AR-LM10 para ofrecer."},
+		{"OFFER AR-LM10(29);", "no stock: No tienes suficiente coleccionables AR-LM10 para ofrecer. (Tienes 5)"},
 	}
 	for _, test := range tests {
 		input := test.input

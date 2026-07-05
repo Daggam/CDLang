@@ -24,11 +24,12 @@ type CollectableName string
 type Collectable struct {
 	Name   CollectableName
 	Amount int
+	Owner  string
 }
 
 func (c *Collectable) Type() ObjectType { return COLLECTABLE_OBJ }
 func (c *Collectable) Inspect() string {
-	return fmt.Sprintf("(%s, Name: %q, Amount: %d)", c.Type(), c.Name, c.Amount)
+	return fmt.Sprintf("(%s, Name: %q, Amount: %d, Owner: %s)", c.Type(), c.Name, c.Amount, c.Owner)
 }
 
 type Exchangeable struct {
@@ -58,6 +59,10 @@ func (of *Offer) Inspect() string {
 		rcollectables = append(rcollectables, collectable.Inspect())
 	}
 	return fmt.Sprintf("(%s, Id: %d,\n\tLCollectable: [%s\t],\n\tRCollectable:[%s\t])", of.Type(), of.Id, lcollectables, rcollectables)
+}
+
+type ViewObject struct {
+	Collection []*Object
 }
 
 const (
@@ -173,19 +178,19 @@ func NewEnvironment() *Environment {
 	collectables := make(map[string][]*Collectable)
 
 	collectables["pepe"] = append(collectables["pepe"],
-		&Collectable{Name: AR_LM10, Amount: 5},
-		&Collectable{Name: BR_VJ7, Amount: 3},
-		&Collectable{Name: FR_KM10, Amount: 12},
-		&Collectable{Name: ES_LY19, Amount: 2},
-		&Collectable{Name: GB_JB10, Amount: 7},
+		&Collectable{Name: AR_LM10, Amount: 5, Owner: "pepe"},
+		&Collectable{Name: BR_VJ7, Amount: 3, Owner: "pepe"},
+		&Collectable{Name: FR_KM10, Amount: 12, Owner: "pepe"},
+		&Collectable{Name: ES_LY19, Amount: 2, Owner: "pepe"},
+		&Collectable{Name: GB_JB10, Amount: 7, Owner: "pepe"},
 	)
 
 	collectables["pancho"] = append(collectables["pancho"],
-		&Collectable{Name: AR_EM23, Amount: 10},
-		&Collectable{Name: BR_NJ10, Amount: 4},
-		&Collectable{Name: FR_AG7, Amount: 8},
-		&Collectable{Name: ES_RH16, Amount: 6},
-		&Collectable{Name: GB_HK9, Amount: 15},
+		&Collectable{Name: AR_EM23, Amount: 10, Owner: "pancho"},
+		&Collectable{Name: BR_NJ10, Amount: 4, Owner: "pancho"},
+		&Collectable{Name: FR_AG7, Amount: 8, Owner: "pancho"},
+		&Collectable{Name: ES_RH16, Amount: 6, Owner: "pancho"},
+		&Collectable{Name: GB_HK9, Amount: 15, Owner: "pancho"},
 	)
 	exchangeable := make(map[string][]*Collectable)
 	offers := make(map[string][]*Offer)
@@ -229,7 +234,7 @@ func (env *Environment) SetExchangeableCollection(queryCollectables []*Collectab
 			}
 			if dc.Name == qc.Name {
 				if qc.Amount > dc.Amount {
-					return fmt.Errorf("no stock: No tienes suficiente coleccionables %s para ofrecer (Tienes %d).", qc.Name, dc.Amount) //La query me pide coleccionables que no tengo
+					return fmt.Errorf("no stock: No tienes suficiente coleccionables %s para ofrecer. (Tienes %d)", qc.Name, dc.Amount) //La query me pide coleccionables que no tengo
 				}
 				dc.Amount -= qc.Amount
 				found := false
@@ -254,4 +259,8 @@ func (env *Environment) SetExchangeableCollection(queryCollectables []*Collectab
 	env.collectables[env.actualUser] = dbCollectables
 	env.exchangeable[env.actualUser] = userExchangeableCollections
 	return nil
+}
+
+func (env *Environment) GetActualUser() string {
+	return env.actualUser
 }

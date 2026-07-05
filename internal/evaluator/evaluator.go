@@ -12,7 +12,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.Program:
 		return evalStatements(node.Statements, env)
 	case *ast.Collectable:
-		return &object.Collectable{Name: object.CollectableName(node.Value), Amount: node.Amount}
+		return &object.Collectable{Name: object.CollectableName(node.Value), Amount: node.Amount, Owner: env.GetActualUser()}
 	case *ast.OfferStatement:
 		queryCollectables := []*object.Collectable{}
 		for _, c := range node.Collectables {
