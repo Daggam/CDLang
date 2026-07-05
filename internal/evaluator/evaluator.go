@@ -1,6 +1,8 @@
 package evaluator
 
 import (
+	"fmt"
+
 	"github.com/Daggam/CDL/internal/ast"
 	"github.com/Daggam/CDL/internal/object"
 )
@@ -20,8 +22,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			}
 			queryCollectables = append(queryCollectables, c_eval)
 		}
-		env.SetExchangeableCollection(queryCollectables)
-
+		err := env.SetExchangeableCollection(queryCollectables)
+		if err != nil {
+			return newError("%s", err.Error())
+		}
 	}
 	return nil
 }
@@ -32,4 +36,8 @@ func evalStatements(stmts []ast.Statement, env *object.Environment) object.Objec
 		result = Eval(statement, env)
 	}
 	return result
+}
+
+func newError(format string, a ...interface{}) *object.Error {
+	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }

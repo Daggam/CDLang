@@ -1,6 +1,9 @@
 package object
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type ObjectType string
 
@@ -207,12 +210,12 @@ func (env *Environment) GetCollectables() []*Collectable {
 	return env.collectables[env.actualUser]
 }
 
-func (env *Environment) SetExchangeableCollection(queryCollectables []*Collectable) {
+func (env *Environment) SetExchangeableCollection(queryCollectables []*Collectable) error {
 	dbCollectables := env.GetCollectables()
 	userExchangeableCollections, ok := env.exchangeable[env.actualUser]
 
 	if len(dbCollectables) == 0 {
-		return
+		return errors.New("no stock: No tienes más stock de coleccionables.")
 	}
 
 	if !ok {
@@ -221,9 +224,12 @@ func (env *Environment) SetExchangeableCollection(queryCollectables []*Collectab
 
 	for _, dc := range dbCollectables {
 		for _, qc := range queryCollectables {
+			if !qc.Name.IsValid() {
+				return errors.New("unknown collectable: El coleccionable AR-LM no existe.")
+			}
 			if dc.Name == qc.Name {
 				if qc.Amount > dc.Amount {
-					return //La query me pide coleccionables que no tengo
+					return errors.New("no stock: No tienes suficiente coleccionables AR-LM10 para ofrecer.") //La query me pide coleccionables que no tengo
 				}
 				dc.Amount -= qc.Amount
 				found := false
@@ -247,4 +253,5 @@ func (env *Environment) SetExchangeableCollection(queryCollectables []*Collectab
 	//Actualizamos la db
 	env.collectables[env.actualUser] = dbCollectables
 	env.exchangeable[env.actualUser] = userExchangeableCollections
+	return nil
 }

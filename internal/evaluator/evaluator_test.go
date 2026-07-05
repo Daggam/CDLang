@@ -64,3 +64,38 @@ func TestEvalOfferStatement(t *testing.T) {
 		}
 	}
 }
+
+func TestErrorOfferStatements(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedMessage string
+	}{
+		{"OFFER AR-LM;", "unknown collectable: El coleccionable AR-LM no existe."},
+		{"OFFER AR-LM10(29);", "no stock: No tienes suficiente coleccionables AR-LM10 para ofrecer."},
+	}
+	for _, test := range tests {
+		input := test.input
+		l := lexer.New(input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+
+		if len(p.Errors()) > 0 {
+			for _, e := range p.Errors() {
+				t.Error(e)
+				t.FailNow()
+			}
+		}
+
+		env := object.NewEnvironment()
+		evaluated := Eval(program, env)
+		errObj, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Errorf("No se obtuvo el error, sino %T(%+v)", evaluated, evaluated)
+		}
+
+		if errObj.Message != test.expectedMessage {
+			t.Errorf("Se esperaba un mensaje de error: %q\nSin embargo se tiene: %q", test.expectedMessage, errObj.Message)
+		}
+
+	}
+}
