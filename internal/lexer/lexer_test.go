@@ -7,7 +7,7 @@ import (
 )
 
 func TestNextToken(t *testing.T) {
-	input := `SEND OFFER messi FOR messi IN USER pepe;`
+	input := `SEND OFFER AR-LM10 FOR messi IN USER pepe;`
 
 	tests := []struct {
 		expectedType    token.TokenType
@@ -15,7 +15,7 @@ func TestNextToken(t *testing.T) {
 	}{
 		{token.SEND, "SEND"},
 		{token.OFFER, "OFFER"},
-		{token.IDENT, "messi"},
+		{token.IDENT, "AR-LM10"},
 		{token.FOR, "FOR"},
 		{token.IDENT, "messi"},
 		{token.IN, "IN"},

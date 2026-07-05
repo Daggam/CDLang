@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/Daggam/CDL/internal/evaluator"
 	"github.com/Daggam/CDL/internal/lexer"
+	"github.com/Daggam/CDL/internal/object"
 	"github.com/Daggam/CDL/internal/parser"
 )
 
@@ -24,12 +26,17 @@ func Start(in io.Reader, out io.Writer) {
 		l := lexer.New(line)
 		p := parser.New(l)
 
-		p.ParseProgram()
+		program := p.ParseProgram()
 
 		if len(p.Errors()) != 0 {
 			printParseErrors(out, p.Errors())
 		}
-
+		env := object.NewEnvironment()
+		evaluated := evaluator.Eval(program, env)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
 		//io.WriteString(out, program.String())
 		//io.WriteString(out, "\n")
 	}

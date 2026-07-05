@@ -4,7 +4,9 @@ import (
 	"testing"
 
 	"github.com/Daggam/CDL/internal/ast"
+	"github.com/Daggam/CDL/internal/lexer"
 	"github.com/Daggam/CDL/internal/object"
+	"github.com/Daggam/CDL/internal/parser"
 	"github.com/Daggam/CDL/internal/token"
 )
 
@@ -33,6 +35,32 @@ func TestEvalCollectables(t *testing.T) {
 		if valueCollectable.Amount != test.expected.Amount {
 			t.Errorf("Se esperaba que valueCollectable tenga el valor %d pero es %d", test.expected.Amount, valueCollectable.Amount)
 
+		}
+	}
+}
+
+func TestEvalOfferStatement(t *testing.T) {
+	input := `OFFER AR-LM10;`
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+
+	if len(p.Errors()) > 0 {
+		for _, e := range p.Errors() {
+			t.Error(e)
+			t.FailNow()
+		}
+	}
+
+	env := object.NewEnvironment()
+
+	Eval(program, env)
+
+	//Corroboremos la base de datos. se tendría que haber agregado 1 messi y quitado otro messi.
+	collectables := env.GetCollectables()
+	for _, c := range collectables {
+		if c.Name == object.AR_LM10 && c.Amount != 4 {
+			t.Errorf("Hay %d AR-LM10 cuando se esperaban 4", c.Amount)
 		}
 	}
 }

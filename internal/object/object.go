@@ -8,6 +8,7 @@ const (
 	COLLECTABLE_OBJ  = "COLLECTABLE"
 	EXCHANGEABLE_OBJ = "EXCHANGEABLE"
 	OFFER_OBJ        = "OFFER"
+	ERROR_OBJ        = "ERROR"
 )
 
 type Object interface {
@@ -135,15 +136,25 @@ func (p CollectableName) IsValid() bool {
 	return exists
 }
 
+type Error struct {
+	Message string
+}
+
+func (e *Error) Type() ObjectType { return ERROR_OBJ }
+func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
+
 // Creamos una base de datos en memoria. Mejora: JSON
 type Environment struct {
 	users []struct {
 		username string
 		password string
 	} //[{"username":"hola","password":"hola"}]
-	collectables map[string][]*Collectable  //{"username":[]{"collectableName","Amount"}}
-	exchangeable map[string][]*Exchangeable //{"Collectable":[]{"username","amount"}}
-	offers       map[string][]*Offer        //{"username":[]{"id",lcollectables,rcollectables}}
+	collectables map[string][]*Collectable //{"username":[]{"collectableName","Amount"}}
+	exchangeable map[string][]*Collectable //{"Collectable":[]{"username","amount"}} {"username":[]{"collectableName","amount"}}
+	offers       map[string][]*Offer       //{"username":[]{"id",lcollectables,rcollectables}}
+
+	//Usuario actual
+	actualUser string
 }
 
 func NewEnvironment() *Environment {
@@ -173,7 +184,7 @@ func NewEnvironment() *Environment {
 		&Collectable{Name: ES_RH16, Amount: 6},
 		&Collectable{Name: GB_HK9, Amount: 15},
 	)
-	exchangeable := make(map[string][]*Exchangeable)
+	exchangeable := make(map[string][]*Collectable)
 	offers := make(map[string][]*Offer)
 
 	//Creación de una oferta de prueba.
@@ -189,5 +200,51 @@ func NewEnvironment() *Environment {
 	// 		{Name: ES_LY19, Amount: 2},
 	// 	},
 	// })
-	return &Environment{users, collectables, exchangeable, offers}
+	return &Environment{users, collectables, exchangeable, offers, "pepe"}
+}
+
+func (env *Environment) GetCollectables() []*Collectable {
+	return env.collectables[env.actualUser]
+}
+
+func (env *Environment) SetExchangeableCollection(queryCollectables []*Collectable) {
+	dbCollectables := env.GetCollectables()
+	userExchangeableCollections, ok := env.exchangeable[env.actualUser]
+
+	if len(dbCollectables) == 0 {
+		return
+	}
+
+	if !ok {
+		userExchangeableCollections = []*Collectable{}
+	}
+
+	for _, dc := range dbCollectables {
+		for _, qc := range queryCollectables {
+			if dc.Name == qc.Name {
+				if qc.Amount > dc.Amount {
+					return //La query me pide coleccionables que no tengo
+				}
+				dc.Amount -= qc.Amount
+				found := false
+
+				//Nos fijamos si ya existe
+				for _, ex := range userExchangeableCollections {
+					if ex.Name != qc.Name {
+						continue
+					}
+					found = true
+					ex.Amount += qc.Amount
+				}
+				//Si no existe agregarlos al intercambiable.
+				if !found {
+					env.exchangeable[env.actualUser] = append(env.exchangeable[env.actualUser], qc)
+				}
+			}
+		}
+	}
+
+	//Actualizamos la db
+	env.collectables[env.actualUser] = dbCollectables
+	env.exchangeable[env.actualUser] = userExchangeableCollections
 }
