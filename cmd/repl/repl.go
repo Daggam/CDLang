@@ -30,9 +30,15 @@ func Start(in io.Reader, out io.Writer) {
 
 		if len(p.Errors()) != 0 {
 			printParseErrors(out, p.Errors())
+			continue
 		}
 		env := object.NewEnvironment()
 		evaluated := evaluator.Eval(program, env)
+		if errObj, ok := evaluated.(*object.Error); ok {
+			io.WriteString(out, errObj.Message)
+			io.WriteString(out, "\n")
+			continue
+		}
 		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out, "\n")

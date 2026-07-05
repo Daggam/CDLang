@@ -153,7 +153,7 @@ type Environment struct {
 		password string
 	} //[{"username":"hola","password":"hola"}]
 	collectables map[string][]*Collectable //{"username":[]{"collectableName","Amount"}}
-	exchangeable map[string][]*Collectable //{"Collectable":[]{"username","amount"}} {"username":[]{"collectableName","amount"}}
+	exchangeable map[string][]*Collectable //{"username":[]{"collectableName","amount"}}
 	offers       map[string][]*Offer       //{"username":[]{"id",lcollectables,rcollectables}}
 
 	//Usuario actual
@@ -225,11 +225,11 @@ func (env *Environment) SetExchangeableCollection(queryCollectables []*Collectab
 	for _, dc := range dbCollectables {
 		for _, qc := range queryCollectables {
 			if !qc.Name.IsValid() {
-				return errors.New("unknown collectable: El coleccionable AR-LM no existe.")
+				return fmt.Errorf("unknown collectable: El coleccionable %s no existe.", qc.Name)
 			}
 			if dc.Name == qc.Name {
 				if qc.Amount > dc.Amount {
-					return errors.New("no stock: No tienes suficiente coleccionables AR-LM10 para ofrecer.") //La query me pide coleccionables que no tengo
+					return fmt.Errorf("no stock: No tienes suficiente coleccionables %s para ofrecer (Tienes %d).", qc.Name, dc.Amount) //La query me pide coleccionables que no tengo
 				}
 				dc.Amount -= qc.Amount
 				found := false
