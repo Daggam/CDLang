@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/Daggam/CDL/internal/evaluator"
+	"github.com/Daggam/CDL/internal/explain"
 	"github.com/Daggam/CDL/internal/lexer"
 	"github.com/Daggam/CDL/internal/object"
 	"github.com/Daggam/CDL/internal/parser"
@@ -22,6 +23,11 @@ func Start(in io.Reader, out io.Writer) {
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			panic("Hubo un error no esperado")
+		}
+
+		if explain.IsExplain(line) {
+			fmt.Fprint(out, explain.Build(line))
+			continue
 		}
 
 		l := lexer.New(line)

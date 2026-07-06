@@ -116,3 +116,12 @@ type DeleteOfferStatement struct {
 
 func (dos *DeleteOfferStatement) statementNode()       {}
 func (dos *DeleteOfferStatement) TokenLiteral() string { return dos.Token.Literal }
+
+// Explain Statement
+type ExplainStatement struct {
+	Token token.Token
+	Inner Statement
+}
+
+func (es *ExplainStatement) statementNode()       {}
+func (es *ExplainStatement) TokenLiteral() string { return es.Token.Literal }

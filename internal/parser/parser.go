@@ -81,6 +81,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseADTradeStatements()
 	case token.DELETE:
 		return p.parseDeleteOfferStatement()
+	case token.EXPLAIN:
+		return p.parseExplainStatement()
 	default:
 		return nil
 	}
@@ -219,6 +221,19 @@ func (p *Parser) parseDeleteOfferStatement() *ast.DeleteOfferStatement {
 }
 
 // ¿El token actual es del tipo t?
+func (p *Parser) parseExplainStatement() *ast.ExplainStatement {
+	stmt := &ast.ExplainStatement{Token: p.curToken}
+
+	p.nextToken()
+	stmt.Inner = p.parseStatement()
+	if stmt.Inner == nil {
+		p.errors = append(p.errors, "EXPLAIN necesita un comando valido despues de la palabra EXPLAIN.")
+		return nil
+	}
+
+	return stmt
+}
+
 func (p *Parser) curTokenIs(t token.TokenType) bool {
 	return p.curToken.Type == t
 }
