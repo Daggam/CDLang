@@ -13,6 +13,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalStatements(node.Statements, env)
 	case *ast.Collectable:
 		return &object.Collectable{Name: object.CollectableName(node.Value), Amount: node.Amount, Owner: env.GetActualUser()}
+	case *ast.Identifier:
+		obj := &object.Identifier{Value: object.CollectableName(node.Value)}
+		if !obj.Value.IsValid() {
+			return newError("unknown collectable: El coleccionable %s no existe.", obj.Value)
+		}
+		return obj
 	case *ast.OfferStatement:
 		queryCollectables := []*object.Collectable{}
 		for _, c := range node.Collectables {
@@ -26,6 +32,15 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if err != nil {
 			return newError("%s", err.Error())
 		}
+	case *ast.GetOfferStatement:
+		identifier := Eval(node.Identifier, env)
+		if identifier.Type() == object.ERROR_OBJ {
+			return identifier
+		}
+		if i, ok := identifier.(*object.Identifier); ok {
+			return env.GetExchangeables(i.Value)
+		}
+		return nil
 	}
 	return nil
 }

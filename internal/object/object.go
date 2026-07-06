@@ -11,6 +11,7 @@ const (
 	COLLECTABLE_OBJ  = "COLLECTABLE"
 	EXCHANGEABLE_OBJ = "EXCHANGEABLE"
 	OFFER_OBJ        = "OFFER"
+	TABLEVIEW_OBJ    = "TABLEVIEW"
 	ERROR_OBJ        = "ERROR"
 )
 
@@ -62,8 +63,26 @@ func (of *Offer) Inspect() string {
 }
 
 type ViewObject struct {
-	Collection []*Object
+	Collections []*Collectable
 }
+
+func (vo *ViewObject) Type() ObjectType { return TABLEVIEW_OBJ }
+func (vo *ViewObject) Inspect() string {
+	msg := fmt.Sprintf("| %-15s | %-8s | %-15s |\n", "Name", "Amount", "Owner")
+
+	for _, tv := range vo.Collections {
+		// Aplicamos los mismos anchos a los datos de la fila
+		msg += fmt.Sprintf("| %-15s | %-8d | %-15s |\n", tv.Name, tv.Amount, tv.Owner)
+	}
+	return msg
+}
+
+type Identifier struct {
+	Value CollectableName
+}
+
+func (i *Identifier) Type() ObjectType { return TABLEVIEW_OBJ }
+func (i *Identifier) Inspect() string  { return fmt.Sprintf("(%s, Value: %s)", i.Type(), i.Value) }
 
 const (
 	// Argentina (AR)
@@ -208,6 +227,23 @@ func NewEnvironment() *Environment {
 	// 		{Name: ES_LY19, Amount: 2},
 	// 	},
 	// })
+
+	//Creación de exchangeables de prueba
+	exchangeable["pepe"] = append(exchangeable["pepe"],
+		&Collectable{Name: AR_LM10, Amount: 5, Owner: "pepe"},
+		&Collectable{Name: BR_VJ7, Amount: 3, Owner: "pepe"},
+		&Collectable{Name: FR_KM10, Amount: 12, Owner: "pepe"},
+		&Collectable{Name: ES_LY19, Amount: 2, Owner: "pepe"},
+		&Collectable{Name: GB_JB10, Amount: 7, Owner: "pepe"},
+	)
+
+	exchangeable["pancho"] = append(exchangeable["pancho"],
+		&Collectable{Name: AR_EM23, Amount: 10, Owner: "pancho"},
+		&Collectable{Name: BR_NJ10, Amount: 4, Owner: "pancho"},
+		&Collectable{Name: FR_AG7, Amount: 8, Owner: "pancho"},
+		&Collectable{Name: ES_RH16, Amount: 6, Owner: "pancho"},
+		&Collectable{Name: GB_HK9, Amount: 15, Owner: "pancho"},
+	)
 	return &Environment{users, collectables, exchangeable, offers, "pepe"}
 }
 
@@ -263,4 +299,19 @@ func (env *Environment) SetExchangeableCollection(queryCollectables []*Collectab
 
 func (env *Environment) GetActualUser() string {
 	return env.actualUser
+}
+
+func (env *Environment) GetExchangeables(collectionName CollectableName) *ViewObject {
+	var c []*Collectable
+	for user, collection := range env.exchangeable {
+		if user == env.actualUser {
+			continue
+		}
+		for _, item := range collection {
+			if item.Name == collectionName {
+				c = append(c, item)
+			}
+		}
+	}
+	return &ViewObject{Collections: c}
 }
