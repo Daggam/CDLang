@@ -71,7 +71,7 @@ Al iniciar, CDLang muestra un prompt (`>>`) donde puedes escribir sentencias del
 
 ```
 Bienvenido a CDL v1.0.0.
->> OFFER messi, cristiano(20), mbappe;
+>> OFFER AR-LM10, FR-KM10(20), AR-RD7;
 ```
 
 ### Sentencias disponibles
@@ -81,15 +81,15 @@ Todas estas sentencias son gramáticamente validas, pero solo algunas son semán
 Aquellas sentencias que son semánticamente validas son: `OFFER <argumentos>`, `GET OFFER <ident>`, `EXPLAIN <consulta>`
 
 
-| Sentencia | Ejemplo |
-|---|---|
-| Crear una oferta | `OFFER AR-LM10, FR-KM(20), AR-RD7;` |
-| Consultar ofertas de un coleccionable | `GET OFFER AR-LM10;` |
-| Enviar una propuesta de intercambio | `SEND OFFER ronaldo FOR AR-LM10 IN USER pepe;` |
-| Ver ofertas disponibles | `VIEW OFFER;` |
-| Aceptar un intercambio (trade) | `ACCEPT TRADE;` o `ACCEPT TRADE 58;` |
-| Rechazar un intercambio (trade) | `DECLINE TRADE;` o `DECLINE TRADE 58;` |
-| Eliminar una oferta propia | `DELETE OFFER AR-LM10;` |
+| Sentencia | Producción sintáctica | Ejemplo |
+|---|---|---|
+| Crear una oferta | `"OFFER" <argumentos>` | `OFFER AR-LM10, FR-KM10(20), AR-RD7;` |
+| Consultar ofertas de un coleccionable | `"GET" "OFFER" <ident>` | `GET OFFER AR-LM10;` |
+| Enviar una propuesta de intercambio | `"SEND" "OFFER" <argumentos> "FOR" <argumentos> "IN" "USER" <ident>` | `SEND OFFER FR-KM FOR AR-LM10 IN USER pepe;` |
+| Ver ofertas disponibles | `"VIEW" "OFFER"` | `VIEW OFFER;` |
+| Aceptar un intercambio (trade) | `"ACCEPT" "TRADE" <int_list>?` |`ACCEPT TRADE;` o `ACCEPT TRADE 58;` |
+| Rechazar un intercambio (trade) | `"DECLINE" "TRADE" <int_list>?` |`DECLINE TRADE;` o `DECLINE TRADE 58;` |
+| Eliminar una oferta propia | `"DELETE" "OFFER" <argumentos>` |`DELETE OFFER AR-LM10;` |
 
 
 ### Comando `EXPLAIN`
