@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/Daggam/CDL/internal/ast"
-	"github.com/Daggam/CDL/internal/lexer"
-	"github.com/Daggam/CDL/internal/token"
+	"github.com/Daggam/CDLang/internal/ast"
+	"github.com/Daggam/CDLang/internal/lexer"
+	"github.com/Daggam/CDLang/internal/token"
 )
 
 type Parser struct {

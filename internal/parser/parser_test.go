@@ -3,8 +3,8 @@ package parser
 import (
 	"testing"
 
-	"github.com/Daggam/CDL/internal/ast"
-	"github.com/Daggam/CDL/internal/lexer"
+	"github.com/Daggam/CDLang/internal/ast"
+	"github.com/Daggam/CDLang/internal/lexer"
 )
 
 func TestOfferStatement(t *testing.T) {

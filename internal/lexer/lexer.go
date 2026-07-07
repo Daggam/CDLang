@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"github.com/Daggam/CDL/internal/token"
+	"github.com/Daggam/CDLang/internal/token"
 )
 
 type Lexer struct {

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Daggam/CDL/internal/evaluator"
-	"github.com/Daggam/CDL/internal/explain"
-	"github.com/Daggam/CDL/internal/lexer"
-	"github.com/Daggam/CDL/internal/object"
-	"github.com/Daggam/CDL/internal/parser"
+	"github.com/Daggam/CDLang/internal/evaluator"
+	"github.com/Daggam/CDLang/internal/explain"
+	"github.com/Daggam/CDLang/internal/lexer"
+	"github.com/Daggam/CDLang/internal/object"
+	"github.com/Daggam/CDLang/internal/parser"
 )
 
 const PROMPT = ">> "

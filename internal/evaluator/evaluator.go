@@ -3,8 +3,8 @@ package evaluator
 import (
 	"fmt"
 
-	"github.com/Daggam/CDL/internal/ast"
-	"github.com/Daggam/CDL/internal/object"
+	"github.com/Daggam/CDLang/internal/ast"
+	"github.com/Daggam/CDLang/internal/object"
 )
 
 func Eval(node ast.Node, env *object.Environment) object.Object {

@@ -3,11 +3,11 @@ package evaluator
 import (
 	"testing"
 
-	"github.com/Daggam/CDL/internal/ast"
-	"github.com/Daggam/CDL/internal/lexer"
-	"github.com/Daggam/CDL/internal/object"
-	"github.com/Daggam/CDL/internal/parser"
-	"github.com/Daggam/CDL/internal/token"
+	"github.com/Daggam/CDLang/internal/ast"
+	"github.com/Daggam/CDLang/internal/lexer"
+	"github.com/Daggam/CDLang/internal/object"
+	"github.com/Daggam/CDLang/internal/parser"
+	"github.com/Daggam/CDLang/internal/token"
 )
 
 func TestEvalCollectables(t *testing.T) {

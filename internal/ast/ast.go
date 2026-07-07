@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"github.com/Daggam/CDL/internal/token"
+	"github.com/Daggam/CDLang/internal/token"
 )
 
 // Una interfaz de nodo para nuestro AST
