@@ -374,3 +374,31 @@ func TestDeleteTradeOffer(t *testing.T) {
 		}
 	}
 }
+
+func TestExplainStatement(t *testing.T) {
+	input := `EXPLAIN ACCEPT TRADE 58;`
+
+	program := createProgram(t, input)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("Se esperaba una unica sentencia, se obtuvieron %d.", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExplainStatement)
+	if !ok {
+		t.Fatalf("stmt no es del tipo ast.ExplainStatement, sino que es del tipo %T", program.Statements[0])
+	}
+
+	if stmt.TokenLiteral() != "EXPLAIN" {
+		t.Fatalf("stmt.TokenLiteral no es EXPLAIN, sino que es %q", stmt.TokenLiteral())
+	}
+
+	inner, ok := stmt.Inner.(*ast.AcceptTradeStatement)
+	if !ok {
+		t.Fatalf("stmt.Inner no es del tipo ast.AcceptTradeStatement, sino que es del tipo %T", stmt.Inner)
+	}
+
+	if len(inner.OfferID) != 1 || inner.OfferID[0] != 58 {
+		t.Fatalf("Se esperaba OfferID [58], se obtuvo %v", inner.OfferID)
+	}
+}
