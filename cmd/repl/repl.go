@@ -50,6 +50,6 @@ func Start(in io.Reader, out io.Writer) {
 
 func printParseErrors(out io.Writer, errors []string) {
 	for _, msg := range errors {
-		io.WriteString(out, "[LEXER] "+msg+"\n")
+		io.WriteString(out, "[PARSER] "+msg+"\n")
 	}
 }
